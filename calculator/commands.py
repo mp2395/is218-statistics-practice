@@ -1,16 +1,24 @@
-"""Supplied application actions; add one action that reads a saved result."""
+"""Application commands and saved-result formatting."""
 from abc import ABC, abstractmethod
 
-HELP = ("Commands: add/subtract/multiply/divide A B; square/sqrt VALUE; "
-        "power VALUE exponent=N; sum/mean/stddev VALUES (stddev ddof=0/1); "
-        "adjust VALUE offset=N scale=N; span VALUES; csv mean/stddev/span PATH; "
-        "history; last; clear; help; exit")
+HELP = (
+    "Commands: add/subtract/multiply/divide A B; square/sqrt VALUE; "
+    "power VALUE exponent=N; sum/mean/stddev VALUES (stddev ddof=0/1); "
+    "adjust VALUE offset=N scale=N; span VALUES; csv mean/stddev/span PATH; "
+    "history; last; clear; help; exit"
+)
 
 
 def _format_entry(calculation, result) -> str:
     values = " ".join(str(value) for value in calculation.values)
-    options = " ".join(f"{key}={value}" for key, value in calculation.options.items())
-    request = " ".join(part for part in (calculation.operation.__name__, values, options) if part)
+    options = " ".join(
+        f"{key}={value}" for key, value in calculation.options.items()
+    )
+    request = " ".join(
+        part
+        for part in (calculation.operation.__name__, values, options)
+        if part
+    )
     return f"{request} = {result:.4f}"
 
 
@@ -35,8 +43,10 @@ class HistoryCommand(Command):
         self.session = session
 
     def execute(self) -> str:
-        lines = [_format_entry(calculation, result)
-                 for calculation, result in self.session.get_history()]
+        lines = [
+            _format_entry(calculation, result)
+            for calculation, result in self.session.get_history()
+        ]
         return "\n".join(lines) or "History is empty."
 
 
@@ -45,8 +55,13 @@ class LastCommand(Command):
         self.session = session
 
     def execute(self) -> str:
-        # TODO: read the latest saved entry; reuse formatting, never calculate again.
-        raise NotImplementedError("Implement last successful result")
+        entries = self.session.get_history()
+
+        if not entries:
+            return "History is empty."
+
+        calculation, result = entries[-1]
+        return _format_entry(calculation, result)
 
 
 class ClearHistoryCommand(Command):
@@ -61,3 +76,4 @@ class ClearHistoryCommand(Command):
 class HelpCommand(Command):
     def execute(self) -> str:
         return HELP
+    

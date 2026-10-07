@@ -1,4 +1,4 @@
-"""Stateless mathematics; only the two calibration adaptations are unfinished."""
+"""Stateless mathematics."""
 from math import pow, sqrt
 from calculator.statistics import mean, standard_deviation
 
@@ -48,10 +48,10 @@ class Operations:
 
     @staticmethod
     def adjust(value, *, offset=0, scale=1) -> float:
-        # TODO: add the offset BEFORE applying the scale.
-        raise NotImplementedError("Implement calibration adjustment")
+        return (value + offset) * scale
 
     @staticmethod
     def span(*values) -> float:
-        # TODO: reject fewer than two values, then return the largest minus smallest.
-        raise NotImplementedError("Implement reading span")
+        if len(values) < 2:
+            raise ValueError("Enter at least two values.")
+        return max(values) - min(values)

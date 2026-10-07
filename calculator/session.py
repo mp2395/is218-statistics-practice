@@ -1,4 +1,4 @@
-"""One deliberately defective method: repair execute-before-record ordering."""
+"""Execute calculations and save successful results."""
 from calculator.history import History
 
 
@@ -7,11 +7,9 @@ class CalculatorSession:
         self._history = History()
 
     def calculate(self, calculation) -> float:
-        # TODO BUG: recording a placeholder before execution pollutes history on
-        # failure and saves the wrong result on success. Replace these two lines:
-        # execute once, then record the actual successful result, then return it.
-        self._history.add(calculation, 0.0)
-        return calculation.get_result()
+        result = calculation.get_result()
+        self._history.add(calculation, result)
+        return result
 
     def get_history(self):
         return self._history.get_history()
